@@ -1,0 +1,22 @@
+V ==> increase the velocity of the probes (>>velocity);
+C ==> decrease the velocity of the probes (>>velocity);
+
+P ==> increase the angle space between the probes' sensors (>>sensor_angle_space);
+O ==> decrease the angle space between the probes' sensors (<<sensor_angle_space);
+
+L ==> increase the speed at which the probes turn (>>turning_speed);
+K ==> decrease the speed at which the probes turn (<<turning_speed);
+
+W ==> increase the distance of the sensors from the probes (>>sensor_offset_distance);
+Q ==> decrease the distance of the sensors from the probes (<<sensor_offset_distance);
+
+S ==> increase the radius of the sensors (>>sensor_radius);
+A ==> decrease the radius of the sensors (<<sensor_radius);
+
+Y ==> increase the vanishing velocity of the trails (vanishing_factor);
+T ==> decrease the vanishing velocity of the trails (vanishing_factor);
+
+H ==> increase the blurring velocity of the trails (alpha);
+G ==> decrease the blurring velocity of the trails (alpha);
+
+B ==> display the values of the variables written before;
