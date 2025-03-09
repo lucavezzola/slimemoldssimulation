@@ -6,8 +6,8 @@ import vezzolaluca.slimemolds.Main;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
-    public static final int GAME_WINDOW_WIDTH = 900; //In pixels
-    public static final int GAME_WINDOW_HEIGHT = (int)(GAME_WINDOW_WIDTH*1.2f); //In pixels
+    public static final int GAME_WINDOW_WIDTH = 1920; //In pixels
+    public static final int GAME_WINDOW_HEIGHT = (int)(GAME_WINDOW_WIDTH*9/16); //In pixels
     
     public static void main(String[] args) {
         if (StartupHelper.startNewJvmIfRequired()) return; // This handles macOS support and helps on Windows.
@@ -33,7 +33,7 @@ public class Lwjgl3Launcher {
         configuration.setWindowedMode(GAME_WINDOW_WIDTH, GAME_WINDOW_HEIGHT);
         configuration.setResizable(false);
         //// You can change these files; they are in lwjgl3/src/main/resources/ .
-        configuration.setWindowIcon("libgdx128.png", "libgdx64.png", "libgdx32.png", "libgdx16.png");
+        configuration.setWindowIcon("slimeMoldsLogo128.png", "slimeMoldsLogo64.png", "slimeMoldsLogo32.png", "slimeMoldsLogo16.png");
         return configuration;
     }
 }

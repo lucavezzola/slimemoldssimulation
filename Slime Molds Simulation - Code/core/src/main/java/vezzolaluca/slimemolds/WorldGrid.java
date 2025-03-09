@@ -27,12 +27,20 @@ public class WorldGrid {
     private Pixmap worldPixmap;
     public Texture worldTexture;
     
+    
+    
     public static float vanishing_factor = 0.99f;
-    float alpha = 0.01f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
+    private float alpha = 0.5f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
     
     private float r = Probe.randomFloatFrom0To1();
     private float g = Probe.randomFloatFrom0To1();
     private float b = Probe.randomFloatFrom0To1();
+    
+    private float newR = Probe.randomFloatFrom0To1();
+    private float newG = Probe.randomFloatFrom0To1();
+    private float newB = Probe.randomFloatFrom0To1();
+    
+    private float colorChangingFactor = 0.001f;
     
     public WorldGrid(){
         rand = new Random();
@@ -153,6 +161,12 @@ public class WorldGrid {
         worldTexture.draw(worldPixmap, 0, 0);
         //Displaying the updated texture
         batch.draw(worldTexture, 0, 0);
+        
+        //Blending the trail color with the new random color
+        r = colorChangingFactor * newR + (1 - colorChangingFactor) * r;
+        g = colorChangingFactor * newG + (1 - colorChangingFactor) * g;
+        b = colorChangingFactor * newB + (1 - colorChangingFactor) * b;
+
     }
     
     
@@ -160,11 +174,11 @@ public class WorldGrid {
     public void manageInputs(){
         //velocity
         if(Gdx.input.isKeyPressed(Input.Keys.V)){
-            //Max velocity is 10000 (the maximum rendering-secure velocity is 1)
-            Probe.velocity = (float)Math.min(10000, Probe.velocity+0.02f*Probe.velocity);
+            //the maximum rendering-secure velocity is 1 (the difference is inversely proportional to the velocity)
+            Probe.velocity = (float)Math.min(10, Probe.velocity+0.01f*Probe.velocity);
         } else if(Gdx.input.isKeyPressed(Input.Keys.C)){
             //Min velocity is 0
-            Probe.velocity = (float)Math.max(0, Probe.velocity-0.02f*Probe.velocity);
+            Probe.velocity = (float)Math.max(0, Probe.velocity-0.01f*Probe.velocity);
         }
         
         //sensor_angle_space
@@ -202,7 +216,7 @@ public class WorldGrid {
             Probe.sensor_radius = (int)Math.max(0, Probe.sensor_radius-1);
         }
         
-        //vanishing_factor
+        //vanishing_factor (the difference is inversely proportional to the factor)
         if(Gdx.input.isKeyPressed(Input.Keys.Y)){
             //Max factor is 1 (never decreases)
             vanishing_factor = (float)Math.min(1, vanishing_factor+0.001f/vanishing_factor);
@@ -225,6 +239,16 @@ public class WorldGrid {
             System.out.println(Probe.staticsToString() + "\nvanishing_factor: " + vanishing_factor + "\nalpha: " + alpha + "\n\n");
         }
     }
+    
+    public void randomizeTrailsColor(){
+        //The possibility to randomize the values by adding a number between -0.5 and +0.5
+        do{
+            newR = (float)Math.min(1, Math.max(0, newR + (Probe.randomFloatFrom0To1() - 0.5)*2));
+            newG = (float)Math.min(1, Math.max(0, newG + (Probe.randomFloatFrom0To1() - 0.5)*2));
+            newB = (float)Math.min(1, Math.max(0, newB + (Probe.randomFloatFrom0To1() - 0.5)*2));
+        }while((newR+newG+newB)<1.5f);
+    }
+
     
     public void dispose(){
         worldPixmap.dispose();

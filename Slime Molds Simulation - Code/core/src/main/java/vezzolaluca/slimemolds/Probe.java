@@ -19,11 +19,11 @@ import static vezzolaluca.slimemolds.Constants.*;
 public class Probe {
     public Vector2 position;
     public float direction;//The angle of the vector of motion in radians (from 0 to 2*PI radians ==> from 0 to 360 degrees)
-    public static float velocity = 0.3f;
+    public static float velocity = 1f;
     
-    public static float sensor_angle_space = 0.1f; //In radians
+    public static float sensor_angle_space = 0.3f; //In radians
     public static float turning_speed = 2f;
-    public static int sensor_offset_distance = 2;
+    public static int sensor_offset_distance = 50;
     public static int sensor_radius = 1;
     
     private static final Random RAND = new Random();
@@ -34,15 +34,13 @@ public class Probe {
     }
     public void updatePosition(float[][] trailMap){
         updateDirection(trailMap);
-        int padding = 10;
         
+        //Updating the position and keeping the probe inside the screen, making it reflect its direction if going outside the borders
         Vector2 newPosition = new Vector2(position.x+(float)Math.cos(direction)*velocity, position.y+(float)Math.sin(direction)*velocity);
         if(newPosition.x<0 || newPosition.x>WORLD_WIDTH || newPosition.y<0 || newPosition.y>WORLD_HEIGHT){
             newPosition.x = (float)Math.min(WORLD_WIDTH-0.1, (float)Math.max(0, newPosition.x));
             newPosition.y = (float)Math.min(WORLD_HEIGHT-0.1, (float)Math.max(0, newPosition.y));
-            this.direction = RAND.nextFloat(2*(float)Math.PI);
-        } else if(newPosition.x<padding || newPosition.x>WORLD_WIDTH-padding || newPosition.y<padding || newPosition.y>WORLD_HEIGHT-padding){
-            this.direction += 0.1f;
+            this.direction = RAND.nextFloat(2*(float)Math.PI); //Randomize the direction to a number between 0 and 2PI
         }
         
         this.position = newPosition;
