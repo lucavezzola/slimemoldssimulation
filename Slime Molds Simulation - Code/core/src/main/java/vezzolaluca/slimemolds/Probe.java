@@ -17,16 +17,17 @@ import static vezzolaluca.slimemolds.Constants.*;
 //A probe will navigate the world leaving a trail behind, following other probes' trails
 //It will be represented by a single white pixel
 public class Probe {
+    private static final Random RAND = new Random();
+    
     public Vector2 position;
     public float direction;//The angle of the vector of motion in radians (from 0 to 2*PI radians ==> from 0 to 360 degrees)
-    public static float velocity = 1f;
+    public static float velocity = 5f;
     
     public static float sensor_angle_space = 0.3f; //In radians
-    public static float turning_speed = 2f;
-    public static int sensor_offset_distance = 50;
-    public static int sensor_radius = 1;
-    
-    private static final Random RAND = new Random();
+    public static float turning_speed = 5f;
+    public static int sensor_offset_distance = 100;
+    public static int sensor_radius = 2;
+    public static boolean loopingBorders = false;
 
     public Probe(Vector2 position, float direction){
         this.position = position;
@@ -35,13 +36,32 @@ public class Probe {
     public void updatePosition(float[][] trailMap){
         updateDirection(trailMap);
         
-        //Updating the position and keeping the probe inside the screen, making it reflect its direction if going outside the borders
-        Vector2 newPosition = new Vector2(position.x+(float)Math.cos(direction)*velocity, position.y+(float)Math.sin(direction)*velocity);
-        if(newPosition.x<0 || newPosition.x>WORLD_WIDTH || newPosition.y<0 || newPosition.y>WORLD_HEIGHT){
-            newPosition.x = (float)Math.min(WORLD_WIDTH-0.1, (float)Math.max(0, newPosition.x));
-            newPosition.y = (float)Math.min(WORLD_HEIGHT-0.1, (float)Math.max(0, newPosition.y));
-            this.direction = RAND.nextFloat(2*(float)Math.PI); //Randomize the direction to a number between 0 and 2PI
+        Vector2 newPosition = new Vector2(position.x+(float)Math.cos(direction)*velocity,
+                    position.y+(float)Math.sin(direction)*velocity);
+        if(loopingBorders){
+            //Updating the position and keeping the probe inside the screen,
+            //making it reflect its direction if going outside the borders
+            if(newPosition.x>=WORLD_WIDTH){
+                newPosition.x = newPosition.x%(WORLD_WIDTH - 1);
+            } else if(newPosition.x<0){
+                newPosition.x = newPosition.x+(WORLD_WIDTH - 1);
+            }
+            if(newPosition.y>=WORLD_HEIGHT){
+                newPosition.y = newPosition.y%(WORLD_HEIGHT - 1);
+            } else if(newPosition.y<0){
+                newPosition.y = newPosition.y+(WORLD_HEIGHT - 1);
+            }
+        } else{
+            //Keep the probes inside the borders
+            if(newPosition.x<0 || newPosition.x>WORLD_WIDTH || newPosition.y<0 || newPosition.y>WORLD_HEIGHT){
+                newPosition.x = (float)Math.min(WORLD_WIDTH-0.1, (float)Math.max(0, newPosition.x));
+                newPosition.y = (float)Math.min(WORLD_HEIGHT-0.1, (float)Math.max(0, newPosition.y));
+                this.direction = RAND.nextFloat(2*(float)Math.PI); //Randomize the direction to a number between 0 and 2PI
+            }
         }
+
+        
+
         
         this.position = newPosition;
     }
@@ -68,26 +88,52 @@ public class Probe {
             direction -= randomFloatFrom0To1() * turning_speed * deltaTime;
         }
     }
+
     
-    private float sense(float sensorAngleOffset, float[][] trailMap){
+    private float sense(float sensorAngleOffset, float[][] trailMap) {
         float sum = 0;
         float sensorDirection = this.direction + sensorAngleOffset;
         // Usa una copia di this.position per calcolare il centro del sensore
-        Vector2 sensorCenter = this.position.cpy().add((float)Math.cos(sensorDirection)*sensor_offset_distance,
-                (float)Math.sin(sensorDirection)*sensor_offset_distance);
-        
-        for(int offsetX=-sensor_radius; offsetX<=sensor_radius; offsetX++){
-            for(int offsetY=-sensor_radius; offsetY<=sensor_radius; offsetY++){
+        Vector2 sensorCenter = this.position.cpy().add((float)Math.cos(sensorDirection) * sensor_offset_distance,
+                (float)Math.sin(sensorDirection) * sensor_offset_distance);
+
+        for (int offsetX = -sensor_radius; offsetX <= sensor_radius; offsetX++) {
+            for (int offsetY = -sensor_radius; offsetY <= sensor_radius; offsetY++) {
                 Vector2 pos = sensorCenter.cpy().add(offsetX, offsetY);
-                
-                if(pos.x>0 && pos.x<WORLD_WIDTH && pos.y>0 && pos.y<WORLD_HEIGHT){
-                    sum += trailMap[(int)pos.x][(int)pos.y];
+
+                if(loopingBorders){
+                    // If the position is outside the map, make it sense on the opposite side
+                    if (pos.x < 0) {
+                        pos.x += WORLD_WIDTH;
+                    } else if (pos.x >= WORLD_WIDTH) {
+                        pos.x -= WORLD_WIDTH;
+                    }
+                    if (pos.y < 0) {
+                        pos.y += WORLD_HEIGHT;
+                    } else if (pos.y >= WORLD_HEIGHT) {
+                        pos.y -= WORLD_HEIGHT;
+                    }
+
+                    // Evita indici fuori dai limiti
+                    int x = (int) pos.x;
+                    int y = (int) pos.y;
+
+                    if (x >= 0 && x < WORLD_WIDTH && y >= 0 && y < WORLD_HEIGHT) {
+                        sum += trailMap[x][y];
+                    }
+                } else{
+                    // If the position is inside the map, sense
+                    if(pos.x>0 && pos.x<WORLD_WIDTH && pos.y>0 && pos.y<WORLD_HEIGHT){
+                        sum += trailMap[(int)pos.x][(int)pos.y];
+                    }
                 }
+                
             }
         }
-        
-        return sum /= Math.pow(sensor_radius*2+1, 2); //It returns the average of the square of the pixels tested by the sensor
+
+        return sum/(float)Math.pow(sensor_radius*2+1, 2);  //It returns the average of the square of the pixels tested by the sensor
     }
+
     
     public static float randomFloatFrom0To1(){
         return RAND.nextFloat(); //Return a number >=0.0 and <1

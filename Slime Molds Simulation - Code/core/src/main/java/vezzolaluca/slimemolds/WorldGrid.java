@@ -30,7 +30,7 @@ public class WorldGrid {
     
     
     public static float vanishing_factor = 0.99f;
-    private float alpha = 0.5f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
+    private float alpha = 0.1f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
     
     private float r = Probe.randomFloatFrom0To1();
     private float g = Probe.randomFloatFrom0To1();
@@ -175,7 +175,7 @@ public class WorldGrid {
         //velocity
         if(Gdx.input.isKeyPressed(Input.Keys.V)){
             //the maximum rendering-secure velocity is 1 (the difference is inversely proportional to the velocity)
-            Probe.velocity = (float)Math.min(10, Probe.velocity+0.01f*Probe.velocity);
+            Probe.velocity = (float)Math.min(100, Probe.velocity+0.01f*Probe.velocity);
         } else if(Gdx.input.isKeyPressed(Input.Keys.C)){
             //Min velocity is 0
             Probe.velocity = (float)Math.max(0, Probe.velocity-0.01f*Probe.velocity);
@@ -232,6 +232,11 @@ public class WorldGrid {
         } else if(Gdx.input.isKeyPressed(Input.Keys.G)){
             //Min factor is 0 (no blur)
             alpha = (float)Math.max(0, alpha-0.01f);
+        }
+        
+        //Enable/disable the looping borders
+        if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_0)){
+            Probe.loopingBorders = !Probe.loopingBorders;
         }
         
         //display Probe's static variables written before
