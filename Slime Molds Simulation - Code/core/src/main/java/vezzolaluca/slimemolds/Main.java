@@ -50,10 +50,10 @@ public class Main extends ApplicationAdapter {
 
         if (!isPaused) {
             worldGrid.updateLogic();
+            worldGrid.blurTrails();
         }
 
         worldGrid.manageInputs();
-        worldGrid.blurTrails();
 
         batch.setProjectionMatrix(cam.combined);
 

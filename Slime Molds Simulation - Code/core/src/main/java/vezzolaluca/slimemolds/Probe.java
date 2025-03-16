@@ -21,7 +21,7 @@ public class Probe {
     
     public Vector2 position;
     public float direction;//The angle of the vector of motion in radians (from 0 to 2*PI radians ==> from 0 to 360 degrees)
-    public static float velocity = 5f;
+    public static float velocity = 1f;
     
     public static float sensor_angle_space = 0.3f; //In radians
     public static float turning_speed = 5f;

@@ -49,7 +49,7 @@ public class WorldGrid {
         
         probes = new Probe[PROBES_NUMBER];
         //Initialize every probe inside a circle with the direction pointing to its center
-        int spawnRadius = (int)(Math.min(WORLD_WIDTH, WORLD_HEIGHT)*0.9f/2); //Pixels
+        int spawnRadius = (int)(Math.min(WORLD_WIDTH, WORLD_HEIGHT)*0.5f/2); //Pixels - the numerator is the scale diameter-to-screenDimension
         for(int i = 0; i < probes.length; i++){
             double angle = Probe.randomFloatFrom0To1() * 2 * Math.PI;
             double distance = Math.sqrt(Probe.randomFloatFrom0To1()) * spawnRadius;
@@ -251,7 +251,7 @@ public class WorldGrid {
             newR = (float)Math.min(1, Math.max(0, newR + (Probe.randomFloatFrom0To1() - 0.5)*2));
             newG = (float)Math.min(1, Math.max(0, newG + (Probe.randomFloatFrom0To1() - 0.5)*2));
             newB = (float)Math.min(1, Math.max(0, newB + (Probe.randomFloatFrom0To1() - 0.5)*2));
-        }while((newR+newG+newB)<1.5f);
+        }while((newR+newG+newB)<2.5f);
     }
 
     
