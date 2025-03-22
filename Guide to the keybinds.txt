@@ -1,6 +1,3 @@
-V ==> increase the velocity of the probes (>>velocity);
-C ==> decrease the velocity of the probes (>>velocity);
-
 P ==> increase the angle space between the probes' sensors (>>sensor_angle_space);
 O ==> decrease the angle space between the probes' sensors (<<sensor_angle_space);
 

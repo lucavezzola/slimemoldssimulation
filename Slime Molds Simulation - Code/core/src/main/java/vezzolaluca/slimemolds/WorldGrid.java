@@ -6,12 +6,15 @@ package vezzolaluca.slimemolds;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Pixmap.Format;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.Vector3;
 import java.util.Random;
 import static vezzolaluca.slimemolds.Constants.*;
 
@@ -19,7 +22,7 @@ import static vezzolaluca.slimemolds.Constants.*;
  *
  * @author lucav
  */
-public class WorldGrid {
+public class WorldGrid implements InputProcessor{
     private Random rand;
     private Probe[] probes;
     
@@ -42,7 +45,13 @@ public class WorldGrid {
     
     private float colorChangingFactor = 0.001f;
     
-    public WorldGrid(){
+    private OrthographicCamera cam;
+    
+    private static int mouseDrawnRadius = 10;
+    
+    public WorldGrid(OrthographicCamera cam){
+        Gdx.input.setInputProcessor(this); //Sets this object to be the input processor of the game
+        
         rand = new Random();
         
         Vector2 worldCenter = new Vector2(WORLD_WIDTH/2, WORLD_HEIGHT/2);
@@ -59,8 +68,14 @@ public class WorldGrid {
 
             // Set direction towards the center
             float direction = (float)Math.atan2(worldCenter.y - spawnY, worldCenter.x - spawnX);
+            
+            //The starting velocity is proportional to the distance of that probe from the world center
+            float velocity = (float)Math.abs(spawnX - WORLD_WIDTH/2)/100f +
+                    (float)Math.abs(spawnY - WORLD_HEIGHT/2)/100f;
 
-            probes[i] = new Probe(new Vector2(spawnX, spawnY), direction);
+            probes[i] = new Probe(new Vector2(spawnX, spawnY), direction, 0.5f);
+            
+            this.cam = cam;
         }
 
 
@@ -134,7 +149,7 @@ public class WorldGrid {
         for(int i=0; i<trailMap.length; i++){
             for(int j=0; j<trailMap[i].length; j++){
                 a = trailMap[i][j];                
-                worldPixmap.setColor(Color.rgba8888(r, g, b, a));
+                worldPixmap.setColor(Color.rgba8888(0.3f, 0.3f, 0.3f, a));
                 worldPixmap.drawPixel(i, j);
             }
         }
@@ -148,7 +163,7 @@ public class WorldGrid {
             float bProbe = (float) (Math.sin(probe.direction));
             
             //on the worldPixmap
-            worldPixmap.setColor(Color.rgba8888(r, g, b, 1f));
+            worldPixmap.setColor(Color.rgba8888(probe.velocity, 0, 1-probe.velocity, 1f));
             worldPixmap.drawPixel((int)probe.position.x, (int)probe.position.y);
             
             //and on the trailMap
@@ -171,79 +186,7 @@ public class WorldGrid {
     
     
     //The values of the static variables of probes can be changed by pressing keys
-    public void manageInputs(){
-        //velocity
-        if(Gdx.input.isKeyPressed(Input.Keys.V)){
-            //the maximum rendering-secure velocity is 1 (the difference is inversely proportional to the velocity)
-            Probe.velocity = (float)Math.min(100, Probe.velocity+0.01f*Probe.velocity);
-        } else if(Gdx.input.isKeyPressed(Input.Keys.C)){
-            //Min velocity is 0
-            Probe.velocity = (float)Math.max(0, Probe.velocity-0.01f*Probe.velocity);
-        }
-        
-        //sensor_angle_space
-        if(Gdx.input.isKeyPressed(Input.Keys.P)){
-            //Max is 2PI radians (bigger vakues give the same results)
-            Probe.sensor_angle_space = (float)Math.min(Math.PI*2, Probe.sensor_angle_space+0.02f);
-        } else if(Gdx.input.isKeyPressed(Input.Keys.O)){
-            Probe.sensor_angle_space = (float)Math.max(0, Probe.sensor_angle_space-0.02f);
-        }
-        
-        //turning_speed
-        if(Gdx.input.isKeyPressed(Input.Keys.L)){
-            //Max turning speed is 100
-            Probe.turning_speed = (float)Math.min(100, Probe.turning_speed+0.02f);
-        } else if(Gdx.input.isKeyPressed(Input.Keys.K)){
-            //Min turning speed is 0
-            Probe.turning_speed = (float)Math.max(0, Probe.turning_speed-0.02f);
-        }
-        
-        //sensor_offset_distance
-        if(Gdx.input.isKeyPressed(Input.Keys.W)){
-            //Max offset is 500 pixels
-            Probe.sensor_offset_distance = (int)Math.min(500, Probe.sensor_offset_distance+1);
-        } else if(Gdx.input.isKeyPressed(Input.Keys.Q)){
-            //Min offset is 0
-            Probe.sensor_offset_distance = (int)Math.max(0, Probe.sensor_offset_distance-1);
-        }
-        
-        //sensor_radius
-        if(Gdx.input.isKeyJustPressed(Input.Keys.S)){
-            //Max radius is 500 pixels
-            Probe.sensor_radius = (int)Math.min(500, Probe.sensor_radius+1);
-        } else if(Gdx.input.isKeyJustPressed(Input.Keys.A)){
-            //Min radius is 0
-            Probe.sensor_radius = (int)Math.max(0, Probe.sensor_radius-1);
-        }
-        
-        //vanishing_factor (the difference is inversely proportional to the factor)
-        if(Gdx.input.isKeyPressed(Input.Keys.Y)){
-            //Max factor is 1 (never decreases)
-            vanishing_factor = (float)Math.min(1, vanishing_factor+0.001f/vanishing_factor);
-        } else if(Gdx.input.isKeyPressed(Input.Keys.T)){
-            //Min factor is 0 (instantly vanished)
-            vanishing_factor = (float)Math.max(0, vanishing_factor-0.001f/vanishing_factor);
-        }
-        
-        //alpha
-        if(Gdx.input.isKeyPressed(Input.Keys.H)){
-            //Max factor is 1 (maximum blur)
-            alpha = (float)Math.min(1, alpha+0.01f);
-        } else if(Gdx.input.isKeyPressed(Input.Keys.G)){
-            //Min factor is 0 (no blur)
-            alpha = (float)Math.max(0, alpha-0.01f);
-        }
-        
-        //Enable/disable the looping borders
-        if(Gdx.input.isKeyJustPressed(Input.Keys.NUM_0)){
-            Probe.loopingBorders = !Probe.loopingBorders;
-        }
-        
-        //display Probe's static variables written before
-        if(Gdx.input.isKeyJustPressed(Input.Keys.B)){
-            System.out.println(Probe.staticsToString() + "\nvanishing_factor: " + vanishing_factor + "\nalpha: " + alpha + "\n\n");
-        }
-    }
+
     
     public void randomizeTrailsColor(){
         //The possibility to randomize the values by adding a number between -0.5 and +0.5
@@ -253,10 +196,181 @@ public class WorldGrid {
             newB = (float)Math.min(1, Math.max(0, newB + (Probe.randomFloatFrom0To1() - 0.5)*2));
         }while((newR+newG+newB)<2.5f);
     }
+    
+    private void drawTrail(Vector3 pos, int radius){
+        Vector3 tempPos = new Vector3();
+        for(int x=(-radius); x<=radius; x++){
+            for(int y=(-radius); y<=radius; y++){
+                tempPos.x = (int)pos.x+x;
+                tempPos.y = (int)pos.y+y;
+                
+                if(tempPos.x>0 && tempPos.x<WORLD_WIDTH && tempPos.y>0 && tempPos.y<WORLD_HEIGHT){
+                    this.trailMap[(int)tempPos.x][(int)tempPos.y] = 1f;
+                }                
+            }
+        }
+    }
 
     
     public void dispose(){
         worldPixmap.dispose();
         worldTexture.dispose();
+    }
+
+    @Override
+    public boolean keyDown(int i) {        
+        switch (i) {
+            // reactivity_factor
+            case Input.Keys.V:
+                Probe.reactivityFactor = (float) Math.min(100, Probe.reactivityFactor + 0.01f * Probe.reactivityFactor);
+                break;
+            case Input.Keys.C:
+                Probe.reactivityFactor = (float) Math.max(0, Probe.reactivityFactor - 0.01f * Probe.reactivityFactor);
+                break;
+
+            // sensor_angle_space
+            case Input.Keys.P:
+                Probe.sensor_angle_space = (float) Math.min(Math.PI * 2, Probe.sensor_angle_space + 0.02f);
+                break;
+            case Input.Keys.O:
+                Probe.sensor_angle_space = (float) Math.max(0, Probe.sensor_angle_space - 0.02f);
+                break;
+
+            // turning_speed
+            case Input.Keys.L:
+                Probe.turning_speed = (float) Math.min(100, Probe.turning_speed + 0.02f);
+                break;
+            case Input.Keys.K:
+                Probe.turning_speed = (float) Math.max(0, Probe.turning_speed - 0.02f);
+                break;
+
+            // sensor_offset_distance
+            case Input.Keys.W:
+                Probe.sensor_offset_distance = (int) Math.min(500, Probe.sensor_offset_distance + 1);
+                break;
+            case Input.Keys.Q:
+                Probe.sensor_offset_distance = (int) Math.max(0, Probe.sensor_offset_distance - 1);
+                break;
+
+            // vanishing_factor
+            case Input.Keys.Y:
+                vanishing_factor = (float) Math.min(1, vanishing_factor + 0.001f / vanishing_factor);
+                break;
+            case Input.Keys.T:
+                vanishing_factor = (float) Math.max(0, vanishing_factor - 0.001f / vanishing_factor);
+                break;
+
+            // alpha
+            case Input.Keys.H:
+                alpha = (float) Math.min(1, alpha + 0.01f);
+                break;
+            case Input.Keys.G:
+                alpha = (float) Math.max(0, alpha - 0.01f);
+                break;
+
+            default:
+                //No valid keyword pressed
+                return false;
+        }
+        
+        return true;
+    }
+
+    @Override
+    public boolean keyUp(int i) {
+        return false;
+    }
+
+    @Override
+    public boolean keyTyped(char c) {
+        switch (c) {
+            // sensor_radius
+            case 's':
+            case 'S':
+                Probe.sensor_radius = (int) Math.min(500, Probe.sensor_radius + 1);
+                break;
+            case 'a':
+            case 'A':
+                Probe.sensor_radius = (int) Math.max(0, Probe.sensor_radius - 1);
+                break;
+
+            // Enable/disable looping borders
+            case '0':
+                Probe.loopingBorders = !Probe.loopingBorders;
+                break;
+
+            // Display Probe's static variables
+            case 'b':
+            case 'B':
+                System.out.println(Probe.staticsToString() +
+                        "\nvanishing_factor: " + vanishing_factor +
+                        "\nalpha: " + alpha +
+                        "\n\n");
+                break;
+
+            default:
+                //No valid keyword typed
+                return false;
+        }
+        
+        return true;
+    }
+
+    // Variabile d'istanza
+    private boolean leftButtonPressed = false;
+
+    @Override
+    public boolean touchDown(int x, int y, int pointer, int button) {
+        if (button == Input.Buttons.LEFT) {
+            leftButtonPressed = true;
+            Vector3 inputPos = new Vector3(x, y, 0);
+            cam.unproject(inputPos);
+            //Inverts the y axis
+            inputPos.y = WORLD_HEIGHT - inputPos.y;
+            //Draw the pixel
+            drawTrail(inputPos, mouseDrawnRadius);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean touchDragged(int x, int y, int pointer) {
+        if (leftButtonPressed) {
+            Vector3 inputPos = new Vector3(x, y, 0);
+            cam.unproject(inputPos);
+            //Inverts the y axis
+            inputPos.y = WORLD_HEIGHT - inputPos.y;
+            // Colora il pixel
+            drawTrail(inputPos, mouseDrawnRadius);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean touchUp(int x, int y, int pointer, int button) {
+        if (button == Input.Buttons.LEFT) {
+            leftButtonPressed = false;
+            return true;
+        }
+        return false;
+    }
+
+
+    @Override
+    public boolean touchCancelled(int i, int i1, int i2, int i3) {
+        leftButtonPressed = false;
+        return true;
+    }
+
+    @Override
+    public boolean mouseMoved(int i, int i1) {
+        return false;
+    }
+
+    @Override
+    public boolean scrolled(float f, float f1) {
+        return false;
     }
 }

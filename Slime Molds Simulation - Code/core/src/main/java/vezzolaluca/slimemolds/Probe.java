@@ -21,17 +21,29 @@ public class Probe {
     
     public Vector2 position;
     public float direction;//The angle of the vector of motion in radians (from 0 to 2*PI radians ==> from 0 to 360 degrees)
-    public static float velocity = 1f;
+    public float velocity;
+    
+    float lastWeightFront;
+    float lastWeightLeft;
+    float lastWeightRight;
     
     public static float sensor_angle_space = 0.3f; //In radians
-    public static float turning_speed = 5f;
+    public static float turning_speed = 0.5f;
     public static int sensor_offset_distance = 100;
     public static int sensor_radius = 2;
+    public static float reactivityFactor = 0.001f; //Used to control acceleration
+    public static float maxVelocity = 0.5f;
     public static boolean loopingBorders = false;
 
-    public Probe(Vector2 position, float direction){
+    public Probe(Vector2 position, float direction, float velocity){
         this.position = position;
         this.direction = direction;
+        this.velocity = velocity;
+        
+        //Initializes the last weights to zero to be able to compare it on the first updatePosition iteration
+        lastWeightFront = 0;
+        lastWeightLeft = 0;
+        lastWeightRight = 0;
     }
     public void updatePosition(float[][] trailMap){
         updateDirection(trailMap);
@@ -74,19 +86,35 @@ public class Probe {
         float weightLeft = sense(sensor_angle_space, trailMap);
         float weightRight = sense(-sensor_angle_space, trailMap);
         
+        float deltaFront = weightFront - lastWeightFront;
+        float deltaLeft = weightLeft - lastWeightLeft;
+        float deltaRight = weightRight - lastWeightRight;
+        
         
         if(weightFront>weightLeft && weightFront>weightRight){
             //Don't turn
+            velocity = Math.min(maxVelocity, Math.max(velocity, velocity + reactivityFactor * weightFront));
         } else if(weightLeft>weightFront && weightRight>weightFront){
             //Turn a random value between left and right
-            direction += (randomFloatFrom0To1() - 0.5) * 2 * turning_speed * deltaTime; //turning speed * deltaTime * a number from -1(included) to 1(excluded)
+            direction += (randomFloatFrom0To1() - 0.5) * 2 * turning_speed * deltaTime;
+            //accelerates/decelerates based on the average right-left pixel density
+            velocity = Math.max(0, velocity - reactivityFactor * ((weightLeft+weightRight)/2));
         } else if(weightLeft>weightRight){
             //Turn left
             direction += randomFloatFrom0To1() * turning_speed * deltaTime;
+            //accelerates/decelerates based on the left pixel density
+            velocity = Math.max(0, velocity - reactivityFactor * weightLeft);
         } else if(weightRight>weightLeft){
             //Turn right
             direction -= randomFloatFrom0To1() * turning_speed * deltaTime;
+            //accelerates/decelerates based on the right pixel density
+            velocity = Math.max(0, velocity - reactivityFactor * weightRight);
         }
+        
+        //Stores the value of the weights for the next iteration
+        lastWeightFront = weightFront*2;
+        lastWeightLeft = weightLeft*2;
+        lastWeightRight = weightRight*2;
     }
 
     
@@ -141,10 +169,10 @@ public class Probe {
     
     public static String staticsToString(){
         return "The values of the variables shared between all of the probes are the following:" +
-                "\nvelocity: " + velocity +
                 "\nsensor_angle_space: " + sensor_angle_space +
                 "\nturning_speed: " + turning_speed +
                 "\nsensor_offset_distance: " + sensor_offset_distance +
+                "\nreactivity_factor: " + reactivityFactor +
                 "\nsensor_radius: " + sensor_radius;
     }
 }

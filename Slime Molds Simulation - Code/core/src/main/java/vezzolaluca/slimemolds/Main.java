@@ -27,7 +27,7 @@ public class Main extends ApplicationAdapter {
         cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
         cam.update();
         
-        worldGrid = new WorldGrid();
+        worldGrid = new WorldGrid(cam);
         batch = new SpriteBatch();
         
         startTimeNs = TimeUtils.nanoTime(); //The starting time (in nanoseconds)
@@ -52,8 +52,6 @@ public class Main extends ApplicationAdapter {
             worldGrid.updateLogic();
             worldGrid.blurTrails();
         }
-
-        worldGrid.manageInputs();
 
         batch.setProjectionMatrix(cam.combined);
 
