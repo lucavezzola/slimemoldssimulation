@@ -4,7 +4,6 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -16,7 +15,7 @@ public class Main extends ApplicationAdapter {
 
     private WorldGrid worldGrid;
 
-    private boolean isPaused = false; // Variabile per gestire lo stato di pausa
+    private boolean isPaused = true; // Variabile per gestire lo stato di pausa
     
     private long startTimeNs;
     private long simulationTimeNs;
@@ -37,8 +36,9 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         // if time passed since the time you set startTimeNs at is more than 10 seconds
-        if (TimeUtils.timeSinceNanos(startTimeNs) > simulationTimeNs*15) {
+        if (TimeUtils.timeSinceNanos(startTimeNs) > simulationTimeNs*50) {
             worldGrid.randomizeTrailsColor();
+            worldGrid.randomizeProperties();
             System.out.println("Changing color....");
             startTimeNs = TimeUtils.nanoTime();
         }

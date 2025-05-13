@@ -30,7 +30,7 @@ public class WorldGrid {
     
     
     public static float vanishing_factor = 0.99f;
-    private float alpha = 0.1f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
+    private float alpha = 0.2f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
     
     private float r = Probe.randomFloatFrom0To1();
     private float g = Probe.randomFloatFrom0To1();
@@ -40,7 +40,7 @@ public class WorldGrid {
     private float newG = Probe.randomFloatFrom0To1();
     private float newB = Probe.randomFloatFrom0To1();
     
-    private float colorChangingFactor = 0.001f;
+    private float colorChangingFactor = 0.005f;
     
     public WorldGrid(){
         rand = new Random();
@@ -254,6 +254,12 @@ public class WorldGrid {
         }while((newR+newG+newB)<2.5f);
     }
 
+    
+    public void randomizeProperties() {
+        this.alpha = rand.nextFloat(0f, 1f);
+        vanishing_factor = rand.nextFloat(0.80f, 1f);
+        Probe.randomizeProperties();
+    }
     
     public void dispose(){
         worldPixmap.dispose();
