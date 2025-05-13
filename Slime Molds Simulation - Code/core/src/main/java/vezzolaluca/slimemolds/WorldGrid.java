@@ -40,7 +40,7 @@ public class WorldGrid {
     private float newG = Probe.randomFloatFrom0To1();
     private float newB = Probe.randomFloatFrom0To1();
     
-    private float colorChangingFactor = 0.005f;
+    private float colorChangingFactor = 0.5f;
     
     public WorldGrid(){
         rand = new Random();

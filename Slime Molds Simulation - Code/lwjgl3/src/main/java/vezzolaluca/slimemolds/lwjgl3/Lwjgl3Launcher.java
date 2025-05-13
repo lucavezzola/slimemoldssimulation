@@ -6,7 +6,7 @@ import vezzolaluca.slimemolds.Main;
 
 /** Launches the desktop (LWJGL3) application. */
 public class Lwjgl3Launcher {
-    public static final int GAME_WINDOW_WIDTH = 1920; //In pixels
+    public static final int GAME_WINDOW_WIDTH = 500; //In pixels
     public static final int GAME_WINDOW_HEIGHT = (int)(GAME_WINDOW_WIDTH*9/16); //In pixels
     
     public static void main(String[] args) {

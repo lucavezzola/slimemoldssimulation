@@ -21,15 +21,6 @@ public class Probe {
     
     public Vector2 position;
     public float direction;//The angle of the vector of motion in radians (from 0 to 2*PI radians ==> from 0 to 360 degrees)
-<<<<<<< Updated upstream
-    public static float velocity = 1f;
-    
-    public static float sensor_angle_space = 0.3f; //In radians
-    public static float turning_speed = 5f;
-    public static int sensor_offset_distance = 100;
-    public static int sensor_radius = 2;
-    public static boolean loopingBorders = false;
-=======
     
     public static float velocity = RAND.nextFloat(0.5f, 1f);
     public static float sensor_angle_space = RAND.nextFloat(0.1f, (float)Math.PI); //In radians
@@ -37,7 +28,6 @@ public class Probe {
     public static int sensor_offset_distance = RAND.nextInt(3, 300);
     public static int sensor_radius = RAND.nextInt(0, 3);
     public static boolean loopingBorders = true;
->>>>>>> Stashed changes
 
     public Probe(Vector2 position, float direction){
         this.position = position;
@@ -151,7 +141,7 @@ public class Probe {
     
     public static void randomizeProperties() {
         loopingBorders = RAND.nextBoolean();
-        velocity = RAND.nextFloat(0.1f, 1f);
+        velocity = RAND.nextFloat(0.5f, 5f);
         sensor_angle_space = RAND.nextFloat(0.1f, (float)Math.PI/2);
         turning_speed = RAND.nextFloat(0.1f, 1f);
         sensor_offset_distance = RAND.nextInt(10, 300);

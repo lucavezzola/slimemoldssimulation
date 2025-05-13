@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.TimeUtils;
+import java.util.Random;
 import static vezzolaluca.slimemolds.Constants.*;
 
 public class Main extends ApplicationAdapter {
@@ -36,10 +37,9 @@ public class Main extends ApplicationAdapter {
     @Override
     public void render() {
         // if time passed since the time you set startTimeNs at is more than 10 seconds
-        if (TimeUtils.timeSinceNanos(startTimeNs) > simulationTimeNs*50) {
+        if (TimeUtils.timeSinceNanos(startTimeNs) > simulationTimeNs*(new Random().nextFloat()*10)) {
             worldGrid.randomizeTrailsColor();
             worldGrid.randomizeProperties();
-            System.out.println("Changing color....");
             startTimeNs = TimeUtils.nanoTime();
         }
 
