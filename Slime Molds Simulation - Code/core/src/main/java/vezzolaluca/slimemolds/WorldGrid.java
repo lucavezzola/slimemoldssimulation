@@ -28,7 +28,7 @@ public class WorldGrid {
     public Texture worldTexture;
     
     
-    
+    //System variables
     public static float vanishing_factor = 0.99f;
     private float alpha = 0.2f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
     
@@ -40,7 +40,7 @@ public class WorldGrid {
     private float newG = Probe.randomFloatFrom0To1();
     private float newB = Probe.randomFloatFrom0To1();
     
-    private float colorChangingFactor = 0.5f;
+    private float colorChangingFactor = 0.005f;
     
     public WorldGrid(){
         rand = new Random();
@@ -143,10 +143,6 @@ public class WorldGrid {
         int probeY;
         //Drawing the probes
         for(Probe probe : probes){
-            float rProbe = (float) (Math.cos(probe.direction));
-            float gProbe = Probe.randomFloatFrom0To1();
-            float bProbe = (float) (Math.sin(probe.direction));
-            
             //on the worldPixmap
             worldPixmap.setColor(Color.rgba8888(r, g, b, 1f));
             worldPixmap.drawPixel((int)probe.position.x, (int)probe.position.y);
@@ -259,6 +255,19 @@ public class WorldGrid {
         this.alpha = rand.nextFloat(0f, 1f);
         vanishing_factor = rand.nextFloat(0.80f, 1f);
         Probe.randomizeProperties();
+    }
+    
+    public String getCurrentSystemVariables() {
+        String s = "";
+        
+        s += Probe.getCurrentSystemVariables();
+        
+        s += "vanishing_factor: " + vanishing_factor + "\n";
+        s += "alpha: " + alpha + "\n";
+        
+        s += "probe RGB: " + (int)(r*255) + ";" + (int)(g*255) + ";" + (int)(b*255) + "\n";
+        
+        return s;
     }
     
     public void dispose(){

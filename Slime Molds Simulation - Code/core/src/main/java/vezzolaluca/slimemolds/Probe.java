@@ -156,4 +156,17 @@ public class Probe {
                 "\nsensor_offset_distance: " + sensor_offset_distance +
                 "\nsensor_radius: " + sensor_radius;
     }
+    
+    public static String getCurrentSystemVariables() {
+        String s = "";
+        
+        s += "velocity: " + velocity + "\n";
+        s += "sensor_angle_space: " + sensor_angle_space + "\n";
+        s += "turning_speed: " + turning_speed + "\n";
+        s += "sensor_offset_distance: " + sensor_offset_distance + "\n";
+        s += "sensor_radius: " + sensor_radius + "\n";
+        s += "loopingBorders: " + loopingBorders + "\n";
+        
+        return s;
+    }
 }

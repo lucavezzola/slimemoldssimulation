@@ -12,5 +12,5 @@ public class Constants {
     public static final int WORLD_WIDTH = 1500; //In pixels
     public static final int WORLD_HEIGHT = (int)(WORLD_WIDTH*9/16); //In pixels
 
-    public static final int PROBES_NUMBER = 50000;
+    public static final int PROBES_NUMBER = 20000;
 }

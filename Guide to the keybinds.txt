@@ -13,6 +13,8 @@ Q ==> decrease the distance of the sensors from the probes (<<sensor_offset_dist
 S ==> increase the radius of the sensors (>>sensor_radius);
 A ==> decrease the radius of the sensors (<<sensor_radius);
 
+0 ==> makes the probes teleport through the top-bottom and left-right walls or bounce on them (!loopingBorders);
+
 Y ==> increase the vanishing velocity of the trails (vanishing_factor);
 T ==> decrease the vanishing velocity of the trails (vanishing_factor);
 
