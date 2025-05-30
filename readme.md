@@ -7,6 +7,13 @@ Di seguito trovi una spiegazione dettagliata e corretta del progetto:
 La simulazione riproduce il comportamento emergente di *Physarum polycephalum* (muffa policefala) attraverso un elevato numero di agenti, detti **sonde** (*probes*), che interagiscono in un ambiente in cui depositano e percepiscono tracce. Le interazioni locali tra sonde e tracce generano pattern globali complessi e dinamici.
 
 ---
+Immagini del progetto:
+
+![program image - example 1](img/example1)
+![program image - example 2](img/example2)
+![program image - example 3](img/example3)
+
+---
 
 ## 1. Parametri Globali
 
