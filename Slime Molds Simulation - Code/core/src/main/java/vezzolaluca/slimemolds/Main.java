@@ -25,11 +25,12 @@ public class Main extends ApplicationAdapter {
     
     @Override
     public void create() {
-        cam = new OrthographicCamera(WORLD_WIDTH, WORLD_HEIGHT);
+        cam = new OrthographicCamera(WORLD_WIDTH*TEXTURE_REPS, WORLD_HEIGHT*TEXTURE_REPS);
         cam.position.set(cam.viewportWidth / 2f, cam.viewportHeight / 2f, 0);
         cam.update();
         
         font = new BitmapFont();
+        font.getData().setScale(1);
         
         worldGrid = new WorldGrid();
         batch = new SpriteBatch();
@@ -67,7 +68,7 @@ public class Main extends ApplicationAdapter {
         worldGrid.manageInputs();
 
         batch.setProjectionMatrix(cam.combined);
-
+        
         ScreenUtils.clear(0f, 0f, 0f, 1f);
         batch.begin();
         worldGrid.draw(batch);

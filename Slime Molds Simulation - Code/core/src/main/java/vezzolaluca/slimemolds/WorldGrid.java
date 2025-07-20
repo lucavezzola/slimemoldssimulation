@@ -29,7 +29,8 @@ public class WorldGrid {
     
     
     //System variables
-    public static float vanishing_factor = 0.99f;
+    private static float TRAIL_THICKNESS = 0.0000001f;
+    public static float VANISHING_FACTOR = 0.99f;
     private float alpha = 0.2f; // Coefficiente di miscelazione, più vicino a 0 rallenta il blurring
     
     private float r = Probe.randomFloatFrom0To1();
@@ -45,25 +46,31 @@ public class WorldGrid {
     public WorldGrid(){
         rand = new Random();
         
-        Vector2 worldCenter = new Vector2(WORLD_WIDTH/2, WORLD_HEIGHT/2);
+        // REMOVED: Vector2 worldCenter = new Vector2(WORLD_WIDTH/2, WORLD_HEIGHT/2);
+        Vector2 worldCenter= new Vector2(WORLD_WIDTH/2, WORLD_HEIGHT/2);
         
         probes = new Probe[PROBES_NUMBER];
         //Initialize every probe inside a circle with the direction pointing to its center
-        int spawnRadius = (int)(Math.min(WORLD_WIDTH, WORLD_HEIGHT)*0.5f/2); //Pixels - the numerator is the scale diameter-to-screenDimension
+        int randomSpawnRadius; //Pixels - the numerator is the scale diameter-to-screenDimension
+        randomSpawnRadius = (int)(Math.min(WORLD_WIDTH, WORLD_HEIGHT)*0.5f/2 * Probe.randomFloatFrom0To1());
+        
+        //Vector2 randomSpawningCenter = new Vector2(rand.nextInt(WORLD_WIDTH), rand.nextInt(WORLD_HEIGHT));
+        int spawnX;
+        int spawnY;
+        float direction;
+        
         for(int i = 0; i < probes.length; i++){
             double angle = Probe.randomFloatFrom0To1() * 2 * Math.PI;
-            double distance = Math.sqrt(Probe.randomFloatFrom0To1()) * spawnRadius;
+            double distance = Math.sqrt(Probe.randomFloatFrom0To1()) * randomSpawnRadius;
 
-            int spawnX = (int)(worldCenter.x + Math.cos(angle) * distance);
-            int spawnY = (int)(worldCenter.y + Math.sin(angle) * distance);
+            spawnX = (int)(worldCenter.x + Math.cos(angle) * distance) % WORLD_WIDTH;
+            spawnY = (int)(worldCenter.y + Math.sin(angle) * distance) % WORLD_HEIGHT;
 
             // Set direction towards the center
-            float direction = (float)Math.atan2(worldCenter.y - spawnY, worldCenter.x - spawnX);
+            direction = (float)Math.atan2(worldCenter.y - spawnY, worldCenter.x - spawnX);
 
             probes[i] = new Probe(new Vector2(spawnX, spawnY), direction);
         }
-
-
         
         
         trailMap = new float[WORLD_WIDTH][WORLD_HEIGHT];
@@ -82,7 +89,7 @@ public class WorldGrid {
         //Updating the trails (making them vanish over time)
         for(int i=0; i<trailMap.length; i++){
             for(int j=0; j<trailMap[i].length; j++){
-                trailMap[i][j] *= vanishing_factor;
+                trailMap[i][j] *= VANISHING_FACTOR;
             }
         }
         
@@ -144,7 +151,12 @@ public class WorldGrid {
         //Drawing the probes
         for(Probe probe : probes){
             //on the worldPixmap
-            worldPixmap.setColor(Color.rgba8888(r, g, b, 1f));
+            int pixel = worldPixmap.getPixel((int)probe.position.x, (int)probe.position.y);
+            Color c = new Color();
+            Color.rgba8888ToColor(c, pixel);
+            float alpha = c.a;
+            
+            worldPixmap.setColor(Color.rgba8888(r, g, b, Math.min(1f, alpha+TRAIL_THICKNESS)));
             worldPixmap.drawPixel((int)probe.position.x, (int)probe.position.y);
             
             //and on the trailMap
@@ -156,7 +168,11 @@ public class WorldGrid {
         //Drawing on the texture
         worldTexture.draw(worldPixmap, 0, 0);
         //Displaying the updated texture
-        batch.draw(worldTexture, 0, 0);
+        for(int xTimes = 0; xTimes<TEXTURE_REPS; xTimes++){
+            for(int yTimes = 0; yTimes<TEXTURE_REPS; yTimes++){
+                batch.draw(worldTexture, xTimes*WORLD_WIDTH, yTimes*WORLD_HEIGHT);
+            }
+        }
         
         //Blending the trail color with the new random color
         r = colorChangingFactor * newR + (1 - colorChangingFactor) * r;
@@ -215,10 +231,10 @@ public class WorldGrid {
         //vanishing_factor (the difference is inversely proportional to the factor)
         if(Gdx.input.isKeyPressed(Input.Keys.Y)){
             //Max factor is 1 (never decreases)
-            vanishing_factor = (float)Math.min(1, vanishing_factor+0.001f/vanishing_factor);
+            VANISHING_FACTOR = (float)Math.min(1, VANISHING_FACTOR+0.001f/VANISHING_FACTOR);
         } else if(Gdx.input.isKeyPressed(Input.Keys.T)){
             //Min factor is 0 (instantly vanished)
-            vanishing_factor = (float)Math.max(0, vanishing_factor-0.001f/vanishing_factor);
+            VANISHING_FACTOR = (float)Math.max(0, VANISHING_FACTOR-0.001f/VANISHING_FACTOR);
         }
         
         //alpha
@@ -237,7 +253,7 @@ public class WorldGrid {
         
         //display Probe's static variables written before
         if(Gdx.input.isKeyJustPressed(Input.Keys.B)){
-            System.out.println(Probe.staticsToString() + "\nvanishing_factor: " + vanishing_factor + "\nalpha: " + alpha + "\n\n");
+            System.out.println(Probe.staticsToString() + "\nvanishing_factor: " + VANISHING_FACTOR + "\nalpha: " + alpha + "\n\n");
         }
     }
     
@@ -253,7 +269,7 @@ public class WorldGrid {
     
     public void randomizeProperties() {
         this.alpha = rand.nextFloat(0f, 1f);
-        vanishing_factor = rand.nextFloat(0.80f, 1f);
+        VANISHING_FACTOR = rand.nextFloat(0.80f, 1f);
         Probe.randomizeProperties();
     }
     
@@ -262,7 +278,7 @@ public class WorldGrid {
         
         s += Probe.getCurrentSystemVariables();
         
-        s += "vanishing_factor: " + vanishing_factor + "\n";
+        s += "vanishing_factor: " + VANISHING_FACTOR + "\n";
         s += "alpha: " + alpha + "\n";
         
         s += "probe RGB: " + (int)(r*255) + ";" + (int)(g*255) + ";" + (int)(b*255) + "\n";
